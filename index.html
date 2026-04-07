@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Juegos Didácticos</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: #1a202c;
+      min-height: 100vh;
+    }
+
+    header {
+      background: linear-gradient(135deg, #2d3a8c, #4f6ae8);
+      color: white;
+      text-align: center;
+      padding: 3rem 1rem 2rem;
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.85;
+    }
+
+    .emoji-banner {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    main {
+      max-width: 960px;
+      margin: 2.5rem auto;
+      padding: 0 1.5rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.5rem;
+    }
+
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 1.75rem 1.5rem;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      transition: transform 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.13);
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1a202c;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      color: #718096;
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      background: #ebf4ff;
+      color: #2b6cb0;
+      width: fit-content;
+    }
+
+    .btn {
+      display: inline-block;
+      margin-top: 0.5rem;
+      padding: 0.55rem 1.25rem;
+      background: #4f6ae8;
+      color: white;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-align: center;
+      transition: background 0.2s;
+    }
+
+    .btn:hover {
+      background: #3a54c8;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2.5rem 1rem;
+      color: #a0aec0;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="emoji-banner">🎮</div>
+  <h1>Juegos Didácticos</h1>
+  <p>Aprende matemáticas jugando — recursos interactivos para estudiantes</p>
+</header>
+
+<main>
+  <p class="section-title">Juegos disponibles</p>
+
+  <div class="games-grid">
+
+    <div class="card">
+      <div class="card-icon">✖️</div>
+      <span class="card-tag">Aritmética</span>
+      <h2>Juego de Multiplicaciones</h2>
+      <p>Practica las tablas de multiplicar de forma divertida e interactiva.</p>
+      <a class="btn" href="https://joy-journer-jig.lovable.app" target="_blank">Jugar ahora</a>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🔢</div>
+      <span class="card-tag">Álgebra</span>
+      <h2>Juego de Potencias Racionales</h2>
+      <p>Aprende potencias con números racionales a través de ejercicios dinámicos.</p>
+      <a class="btn" href="https://visual-flair-aid.lovable.app" target="_blank">Jugar ahora</a>
+    </div>
+
+    <div class="card">
+      <div class="card-icon">🔟</div>
+      <span class="card-tag">Números</span>
+      <h2>Fracciones Decimales</h2>
+      <p>Practica la conversión y comprensión de fracciones decimales de forma interactiva.</p>
+      <a class="btn" href="https://play-brighten-it.lovable.app" target="_blank">Jugar ahora</a>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  Creado con ❤️ para el aprendizaje — Juegos Didácticos
+</footer>
+
+</body>
+</html>

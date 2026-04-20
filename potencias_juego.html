@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PowerFrac — Potencias de Racionales</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Boogaloo&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<style>
+:root {
+  --bg:#0e0e1a;--card:#1e1e38;--border:#2e2e52;
+  --accent:#7c6aff;--accent2:#ff6ab0;--gold:#ffd166;
+  --green:#06d6a0;--red:#ef476f;--text:#e8e6ff;--muted:#7b78a8;
+  --font-d:'Boogaloo',cursive;--font-b:'Space Grotesk',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);min-height:100vh;display:flex;align-items:flex-start;justify-content:center;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 15% 25%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 65% 8%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1.5px 1.5px at 82% 72%,rgba(255,255,255,.18) 0%,transparent 100%),radial-gradient(1px 1px at 42% 88%,rgba(255,255,255,.15) 0%,transparent 100%),radial-gradient(1px 1px at 8% 62%,rgba(255,255,255,.12) 0%,transparent 100%);pointer-events:none;z-index:0}
+.app{position:relative;z-index:1;width:100%;max-width:620px;padding:1rem}
+.screen{display:none;animation:fadeIn .3s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* HOME */
+.home-hero{text-align:center;padding:2.5rem 1rem 2rem}
+.planet{width:80px;height:80px;background:radial-gradient(circle at 35% 35%,#b09fff,#5a45d1 60%,#1a1260);border-radius:50%;margin:0 auto 1.5rem;box-shadow:0 0 40px rgba(124,106,255,.5),inset -8px -8px 20px rgba(0,0,0,.4);animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.game-title{font-family:var(--font-d);font-size:clamp(3rem,10vw,5rem);letter-spacing:2px;background:linear-gradient(135deg,var(--accent) 0%,var(--accent2) 60%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.1;margin-bottom:.25rem}
+.game-tagline{font-size:13px;color:var(--muted);margin-bottom:2rem;letter-spacing:.1em;text-transform:uppercase}
+.mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:1rem}
+.mode-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.25rem 1rem;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;text-align:center}
+.mode-card:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 0 20px rgba(124,106,255,.25)}
+.mode-icon{font-size:2rem;margin-bottom:.4rem}
+.mode-name{font-weight:700;font-size:15px;margin-bottom:.2rem}
+.mode-desc{font-size:12px;color:var(--muted)}
+.btn-ghost{width:100%;padding:12px;background:transparent;border:1px solid var(--border);border-radius:12px;color:var(--muted);font-family:var(--font-b);font-size:14px;cursor:pointer;transition:all .2s}
+.btn-ghost:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* DIFFICULTY */
+.diff-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:1.5rem}
+.diff-btn{padding:1rem .5rem;border-radius:14px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-family:var(--font-b);font-size:13px;font-weight:600;cursor:pointer;text-align:center;transition:all .2s}
+.diff-btn:hover,.diff-btn.selected{border-color:var(--accent);background:rgba(124,106,255,.15);color:var(--accent)}
+.diff-icon{font-size:1.5rem;display:block;margin-bottom:.4rem}
+.start-btn{width:100%;padding:15px;background:linear-gradient(135deg,var(--accent2),#cc1f71);border:none;border-radius:14px;color:white;font-family:var(--font-d);font-size:1.4rem;cursor:pointer;letter-spacing:1px;transition:all .2s}
+.start-btn:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(255,106,176,.4)}
+
+/* GAME HEADER */
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;gap:.6rem}
+.stat-pill{background:var(--card);border:1px solid var(--border);border-radius:100px;padding:5px 13px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:5px}
+.stat-pill.lives .icon{color:var(--red)}
+.stat-pill.streak{border-color:rgba(255,209,102,.4);color:var(--gold)}
+.timer-wrap{flex:1}
+.timer-bar{height:6px;background:var(--border);border-radius:4px;overflow:hidden}
+.timer-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:4px;transition:width .1s linear,background .3s}
+.timer-fill.warn{background:linear-gradient(90deg,var(--gold),var(--red))}
+.progress-row{display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;font-size:12px;color:var(--muted)}
+.progress-dots{display:flex;gap:4px;flex:1}
+.dot{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background .3s}
+.dot.done{background:var(--green)}.dot.current{background:var(--accent)}.dot.wrong-done{background:var(--red)}
+
+/* CATEGORY */
+.cat-tag{display:inline-block;font-size:11px;padding:3px 10px;border-radius:100px;background:rgba(124,106,255,.15);color:var(--accent);border:1px solid rgba(124,106,255,.3);margin-bottom:.6rem;letter-spacing:.04em}
+
+/* QUESTION CARD */
+.q-card{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:2rem 1.5rem;margin-bottom:.9rem;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;transition:border-color .3s,box-shadow .3s;min-height:140px}
+.q-card.correct-flash{border-color:var(--green);box-shadow:0 0 24px rgba(6,214,160,.2)}
+.q-card.wrong-flash{border-color:var(--red);box-shadow:0 0 24px rgba(239,71,111,.2)}
+.q-label{font-size:11px;color:var(--muted);margin-bottom:.75rem;text-transform:uppercase;letter-spacing:.1em}
+
+/* KaTeX theme */
+.katex{color:var(--text)!important}
+.katex .mord,.katex .mbin,.katex .mrel,.katex .mopen,.katex .mclose,.katex .mpunct,.katex .minner,.katex .mfrac,.katex .mfracnum,.katex .mfracden{color:var(--text)!important}
+.q-display .katex{font-size:2.2em!important}
+.q-display .katex .mord,.q-display .katex .mbin,.q-display .katex .mrel{color:var(--text)!important}
+
+/* OPTIONS VERTICAL */
+.opts-list{display:flex;flex-direction:column;gap:.55rem}
+.opt-btn{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:.85rem 1.25rem;cursor:pointer;color:var(--text);text-align:left;transition:all .2s;display:flex;align-items:center;gap:1rem;width:100%}
+.opt-btn:hover:not(:disabled){border-color:var(--accent);background:rgba(124,106,255,.1);transform:translateX(4px)}
+.opt-btn:disabled{cursor:default}
+.opt-btn.correct{background:rgba(6,214,160,.12);border-color:var(--green)}
+.opt-btn.correct .opt-ltr{background:var(--green);color:#001a12;border-color:var(--green)}
+.opt-btn.wrong{background:rgba(239,71,111,.1);border-color:var(--red)}
+.opt-btn.wrong .opt-ltr{background:var(--red);color:#fff;border-color:var(--red)}
+.opt-btn.reveal{background:rgba(6,214,160,.07);border-color:rgba(6,214,160,.5)}
+.opt-btn.reveal .opt-ltr{background:rgba(6,214,160,.2);color:var(--green);border-color:rgba(6,214,160,.5)}
+.opt-ltr{min-width:28px;height:28px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--muted);flex-shrink:0;transition:all .2s}
+.opt-math{flex:1;display:flex;align-items:center;justify-content:flex-start}
+.opt-math .katex{font-size:1.2em!important;color:var(--text)!important}
+.opt-math .katex .mord,.opt-math .katex .mbin,.opt-math .katex .mrel{color:var(--text)!important}
+
+/* FEEDBACK */
+.fb{margin-top:.7rem;padding:.75rem 1rem;border-radius:12px;font-size:13px;line-height:1.6;opacity:0;transform:translateY(6px);transition:all .3s;display:none}
+.fb.show{opacity:1;transform:translateY(0);display:block}
+.fb.ok{background:rgba(6,214,160,.1);border:1px solid rgba(6,214,160,.3);color:#a8ffe8}
+.fb.err{background:rgba(239,71,111,.1);border:1px solid rgba(239,71,111,.3);color:#ffb3c4}
+
+/* NEXT BTN */
+.next-btn{width:100%;margin-top:.75rem;padding:14px;background:linear-gradient(135deg,var(--accent),#5a45d1);border:none;border-radius:14px;color:white;font-family:var(--font-b);font-size:16px;font-weight:700;cursor:pointer;transition:transform .2s,box-shadow .2s;display:none;letter-spacing:.03em}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,106,255,.4)}
+.next-btn.vis{display:block;animation:popIn .3s cubic-bezier(.18,.89,.32,1.28)}
+@keyframes popIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* COMBO */
+.combo{position:fixed;top:28%;left:50%;transform:translateX(-50%) scale(0);background:var(--gold);color:#1a1200;font-family:var(--font-d);font-size:1.9rem;padding:.5rem 2rem;border-radius:100px;z-index:100;pointer-events:none;transition:transform .3s cubic-bezier(.18,.89,.32,1.28),opacity .3s;opacity:0}
+.combo.show{transform:translateX(-50%) scale(1);opacity:1}
+
+/* RESULTS */
+.r-wrap{text-align:center;padding:2rem 1rem}
+.r-grade{font-family:var(--font-d);font-size:clamp(2.5rem,10vw,5rem);line-height:1;margin-bottom:.5rem}
+.r-stars{font-size:2.5rem;margin-bottom:1rem;letter-spacing:4px}
+.r-sub{font-size:15px;color:var(--muted);margin-bottom:2rem}
+.stats-g{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:2rem}
+.s-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:1rem .75rem}
+.s-box .val{font-size:1.75rem;font-weight:700;margin-bottom:.2rem}
+.s-box .lbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.r-btns{display:flex;gap:.75rem}
+.btn-m{flex:1;padding:13px;border-radius:12px;border:none;font-family:var(--font-b);font-size:15px;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-m:hover{transform:translateY(-2px)}
+.btn-pri{background:linear-gradient(135deg,var(--accent),#5a45d1);color:white}
+.btn-pri:hover{box-shadow:0 8px 24px rgba(124,106,255,.4)}
+.btn-sec{background:var(--card);border:1px solid var(--border);color:var(--text)}
+.btn-sec:hover{border-color:var(--accent2);color:var(--accent2)}
+
+/* REFERENCE */
+.ref-hd{display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem;padding-top:.5rem}
+.back-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-family:var(--font-b);font-size:13px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.back-btn:hover{border-color:var(--accent);color:var(--accent)}
+.ref-ttl{font-family:var(--font-d);font-size:1.75rem}
+.ref-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.1rem 1.25rem;margin-bottom:.75rem}
+.ref-name{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:.5rem}
+.ref-f{margin-bottom:.5rem}
+.ref-f .katex{font-size:1em!important;color:var(--text)!important}
+.ref-f .katex .mord,.ref-f .katex .mbin{color:var(--text)!important}
+.ref-ex{font-size:12px;color:var(--muted);background:rgba(255,255,255,.04);padding:.45rem .7rem;border-radius:8px}
+.ref-ex .katex{font-size:.9em!important}
+.ref-warn{font-size:12px;color:#ffd166;margin-top:.5rem;padding:.4rem .7rem;background:rgba(255,209,102,.08);border-radius:8px;border-left:2px solid rgba(255,209,102,.5)}
+
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HOME -->
+<div id="sc-home" class="screen active">
+  <div class="home-hero">
+    <div class="planet"></div>
+    <div class="game-title">PowerFrac</div>
+    <div class="game-tagline">Potencias de números racionales</div>
+  </div>
+  <div class="mode-grid">
+    <div class="mode-card" onclick="startMode('clasico')"><div class="mode-icon">🎯</div><div class="mode-name">Clásico</div><div class="mode-desc">20 preguntas · 3 vidas</div></div>
+    <div class="mode-card" onclick="startMode('contrarreloj')"><div class="mode-icon">⏱️</div><div class="mode-name">Contrarreloj</div><div class="mode-desc">15 seg por pregunta</div></div>
+    <div class="mode-card" onclick="startMode('repaso')"><div class="mode-icon">📚</div><div class="mode-name">Repaso</div><div class="mode-desc">Sin presión ni penalización</div></div>
+    <div class="mode-card" onclick="startMode('desafio')"><div class="mode-icon">🔥</div><div class="mode-name">Desafío</div><div class="mode-desc">Sin vidas · 1 intento</div></div>
+  </div>
+  <button class="btn-ghost" onclick="goRef()">📖 Propiedades y fórmulas</button>
+</div>
+
+<!-- DIFFICULTY -->
+<div id="sc-diff" class="screen">
+  <div style="text-align:center;margin-bottom:1.5rem;padding-top:.5rem">
+    <div style="font-family:var(--font-d);font-size:2rem;margin-bottom:.25rem">Dificultad</div>
+    <div style="font-size:13px;color:var(--muted)">Elige el nivel antes de comenzar</div>
+  </div>
+  <div class="diff-grid">
+    <button class="diff-btn selected" onclick="selDiff(this,'facil')"><span class="diff-icon">🌱</span>Fácil</button>
+    <button class="diff-btn" onclick="selDiff(this,'medio')"><span class="diff-icon">⚡</span>Medio</button>
+    <button class="diff-btn" onclick="selDiff(this,'dificil')"><span class="diff-icon">💀</span>Difícil</button>
+  </div>
+  <button class="start-btn" onclick="launchGame()">¡JUGAR!</button>
+  <div style="margin-top:.75rem"><button class="btn-ghost" onclick="go('sc-home')">← Volver</button></div>
+</div>
+
+<!-- GAME -->
+<div id="sc-game" class="screen">
+  <div class="game-header">
+    <div class="stat-pill"><span>⭐</span><span id="d-score">0</span></div>
+    <div class="timer-wrap"><div class="timer-bar"><div class="timer-fill" id="t-fill" style="width:100%"></div></div></div>
+    <div class="stat-pill lives"><span class="icon">❤️</span><span id="d-lives">3</span></div>
+    <div class="stat-pill streak" id="sp" style="display:none"><span>🔥</span><span id="d-streak">0</span></div>
+  </div>
+  <div class="progress-row"><span id="q-ctr">1/20</span><div class="progress-dots" id="p-dots"></div></div>
+  <div id="cat-tag" class="cat-tag">Definición</div>
+  <div class="q-card" id="q-card">
+    <div class="q-label">Calcula:</div>
+    <div class="q-display" id="q-disp"></div>
+  </div>
+  <div class="opts-list" id="opts"></div>
+  <div class="fb" id="fb"></div>
+  <button class="next-btn" id="nb" onclick="nextQ()">Siguiente →</button>
+</div>
+
+<!-- RESULTS -->
+<div id="sc-res" class="screen">
+  <div class="r-wrap">
+    <div class="r-stars" id="r-stars">⭐⭐⭐</div>
+    <div class="r-grade" id="r-grade">¡Genial!</div>
+    <div class="r-sub" id="r-sub"></div>
+    <div class="stats-g">
+      <div class="s-box"><div class="val" id="r-c" style="color:var(--green)">0</div><div class="lbl">Correctas</div></div>
+      <div class="s-box"><div class="val" id="r-s" style="color:var(--accent)">0</div><div class="lbl">Puntos</div></div>
+      <div class="s-box"><div class="val" id="r-mx" style="color:var(--gold)">0</div><div class="lbl">Racha máx</div></div>
+    </div>
+    <div class="r-btns">
+      <button class="btn-m btn-pri" onclick="restart()">🔁 Jugar de nuevo</button>
+      <button class="btn-m btn-sec" onclick="go('sc-home')">🏠 Inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- REFERENCE -->
+<div id="sc-ref" class="screen">
+  <div class="ref-hd"><button class="back-btn" onclick="go('sc-home')">← Volver</button><div class="ref-ttl">Propiedades</div></div>
+  <div id="ref-body"></div>
+</div>
+
+</div>
+<div class="combo" id="combo">🔥 ¡COMBO!</div>
+
+<script>
+/* KaTeX helper */
+function tex(s, disp=false) {
+  try { return katex.renderToString(s,{displayMode:disp,throwOnError:false,output:'html'}); }
+  catch(e){ return '<span>'+s+'</span>'; }
+}
+
+/* ── PREGUNTAS (30) ── */
+const QS = [
+  // Definición
+  {cat:"Definición",d:1,q:"\\left(\\dfrac{2}{3}\\right)^3 = \\;?",o:["\\dfrac{6}{9}","\\dfrac{8}{27}","\\dfrac{8}{9}","\\dfrac{2}{27}"],c:1,e:"Se eleva num. y den. por separado: 2³/3³ = 8/27"},
+  {cat:"Definición",d:1,q:"\\left(\\dfrac{3}{4}\\right)^2 = \\;?",o:["\\dfrac{6}{8}","\\dfrac{9}{16}","\\dfrac{3}{8}","\\dfrac{9}{8}"],c:1,e:"3² = 9 y 4² = 16 → 9/16"},
+  {cat:"Definición",d:1,q:"\\left(\\dfrac{1}{5}\\right)^4 = \\;?",o:["\\dfrac{4}{20}","\\dfrac{1}{9}","\\dfrac{1}{625}","\\dfrac{4}{625}"],c:2,e:"1⁴ = 1 y 5⁴ = 625 → 1/625"},
+  {cat:"Definición",d:2,q:"\\left(\\dfrac{5}{2}\\right)^3 = \\;?",o:["\\dfrac{125}{8}","\\dfrac{15}{6}","\\dfrac{25}{6}","\\dfrac{125}{6}"],c:0,e:"5³ = 125 y 2³ = 8 → 125/8"},
+  {cat:"Definición",d:1,q:"\\left(\\dfrac{2}{7}\\right)^0 = \\;?",o:["0","\\dfrac{2}{7}","1","\\dfrac{4}{49}"],c:2,e:"Todo racional no nulo elevado a 0 es igual a 1"},
+  {cat:"Definición",d:1,q:"\\left(\\dfrac{3}{5}\\right)^1 = \\;?",o:["1","\\dfrac{9}{25}","\\dfrac{3}{5}","\\dfrac{5}{3}"],c:2,e:"Cualquier número elevado a 1 es él mismo"},
+  // Exp. negativo
+  {cat:"Exp. negativo",d:2,q:"\\left(\\dfrac{2}{3}\\right)^{-2} = \\;?",o:["\\dfrac{4}{9}","-\\dfrac{4}{9}","\\dfrac{9}{4}","-\\dfrac{9}{4}"],c:2,e:"Invertir y elevar al positivo: (3/2)² = 9/4"},
+  {cat:"Exp. negativo",d:2,q:"\\left(\\dfrac{1}{4}\\right)^{-3} = \\;?",o:["\\dfrac{1}{64}","-64","64","-\\dfrac{1}{64}"],c:2,e:"(4/1)³ = 4³ = 64"},
+  {cat:"Exp. negativo",d:1,q:"\\left(\\dfrac{5}{3}\\right)^{-1} = \\;?",o:["\\dfrac{5}{3}","-\\dfrac{3}{5}","\\dfrac{3}{5}","-\\dfrac{5}{3}"],c:2,e:"Exp. −1 = recíproco de la fracción: 3/5"},
+  {cat:"Exp. negativo",d:2,q:"\\left(\\dfrac{2}{5}\\right)^{-3} = \\;?",o:["-\\dfrac{125}{8}","\\dfrac{8}{125}","\\dfrac{125}{8}","-\\dfrac{8}{125}"],c:2,e:"(5/2)³ = 125/8"},
+  {cat:"Exp. negativo",d:2,q:"\\left(\\dfrac{3}{7}\\right)^{-2} = \\;?",o:["\\dfrac{9}{49}","\\dfrac{49}{9}","-\\dfrac{9}{49}","\\dfrac{6}{14}"],c:1,e:"(7/3)² = 49/9"},
+  // P1
+  {cat:"P1 — Igual base",d:2,q:"\\left(\\dfrac{2}{5}\\right)^2 \\cdot \\left(\\dfrac{2}{5}\\right)^3 = \\;?",o:["\\left(\\dfrac{2}{5}\\right)^{6}","\\left(\\dfrac{2}{5}\\right)^{5}","\\left(\\dfrac{4}{25}\\right)^{5}","\\left(\\dfrac{2}{5}\\right)^{1}"],c:1,e:"Misma base → sumar exponentes: 2+3 = 5"},
+  {cat:"P1 — Igual base",d:3,q:"\\left(\\dfrac{1}{3}\\right)^4 \\cdot \\left(\\dfrac{1}{3}\\right)^{-1} = \\;?",o:["\\left(\\dfrac{1}{3}\\right)^{5}","\\left(\\dfrac{1}{3}\\right)^{3}","\\left(\\dfrac{1}{3}\\right)^{-4}","\\left(\\dfrac{1}{3}\\right)^{4}"],c:1,e:"4 + (−1) = 3 → (1/3)³"},
+  {cat:"P1 — Igual base",d:2,q:"\\left(\\dfrac{3}{4}\\right)^2 \\cdot \\left(\\dfrac{3}{4}\\right)^0 = \\;?",o:["\\left(\\dfrac{3}{4}\\right)^{2}","\\left(\\dfrac{3}{4}\\right)^{0}","\\left(\\dfrac{3}{4}\\right)^{3}","\\left(\\dfrac{3}{4}\\right)^{1}"],c:0,e:"2 + 0 = 2 → (3/4)²"},
+  // P2
+  {cat:"P2 — Cociente",d:2,q:"\\left(\\dfrac{5}{2}\\right)^5 \\div \\left(\\dfrac{5}{2}\\right)^3 = \\;?",o:["\\left(\\dfrac{5}{2}\\right)^{8}","\\left(\\dfrac{5}{2}\\right)^{15}","\\left(\\dfrac{5}{2}\\right)^{2}","\\left(\\dfrac{5}{2}\\right)^{1}"],c:2,e:"Misma base → restar exponentes: 5−3 = 2"},
+  {cat:"P2 — Cociente",d:2,q:"\\left(\\dfrac{3}{7}\\right)^6 \\div \\left(\\dfrac{3}{7}\\right)^6 = \\;?",o:["0","\\left(\\dfrac{3}{7}\\right)^{1}","1","\\left(\\dfrac{3}{7}\\right)^{0}"],c:2,e:"6−6 = 0 → cualquier base no nula a la 0 = 1"},
+  {cat:"P2 — Cociente",d:3,q:"\\left(\\dfrac{2}{9}\\right)^4 \\div \\left(\\dfrac{2}{9}\\right)^7 = \\;?",o:["\\left(\\dfrac{2}{9}\\right)^{3}","\\left(\\dfrac{2}{9}\\right)^{-3}","\\left(\\dfrac{2}{9}\\right)^{11}","\\left(\\dfrac{9}{2}\\right)^{4}"],c:1,e:"4−7 = −3 → (2/9)^−3 = (9/2)³"},
+  {cat:"P2 — Cociente",d:2,q:"\\dfrac{\\left(\\dfrac{3}{5}\\right)^5}{\\left(\\dfrac{3}{5}\\right)^2} = \\;?",o:["\\left(\\dfrac{3}{5}\\right)^{10}","\\left(\\dfrac{3}{5}\\right)^{3}","\\left(\\dfrac{3}{5}\\right)^{7}","\\left(\\dfrac{3}{5}\\right)^{\\frac{5}{2}}"],c:1,e:"División igual base → restar: 5−2 = 3"},
+  // P3
+  {cat:"P3 — Pot. de pot.",d:2,q:"\\left[\\left(\\dfrac{1}{2}\\right)^3\\right]^2 = \\;?",o:["\\left(\\dfrac{1}{2}\\right)^{6}","\\left(\\dfrac{1}{2}\\right)^{5}","\\left(\\dfrac{1}{2}\\right)^{8}","\\left(\\dfrac{1}{2}\\right)^{1}"],c:0,e:"Multiplicar exponentes: 3×2 = 6"},
+  {cat:"P3 — Pot. de pot.",d:2,q:"\\left[\\left(\\dfrac{2}{3}\\right)^2\\right]^3 = \\;?",o:["\\left(\\dfrac{2}{3}\\right)^{5}","\\left(\\dfrac{2}{3}\\right)^{6}","\\left(\\dfrac{2}{3}\\right)^{2}","\\dfrac{64}{729}"],c:1,e:"2×3 = 6 → (2/3)⁶ = 64/729"},
+  {cat:"P3 — Pot. de pot.",d:3,q:"\\left[\\left(\\dfrac{3}{5}\\right)^{-1}\\right]^2 = \\;?",o:["\\left(\\dfrac{3}{5}\\right)^{2}","\\left(\\dfrac{5}{3}\\right)^{2}","\\left(\\dfrac{3}{5}\\right)^{-2}","\\left(\\dfrac{5}{3}\\right)^{-2}"],c:1,e:"(−1)×2 = −2 → (3/5)^−2 = (5/3)² = 25/9"},
+  // Base neg.
+  {cat:"Base negativa",d:2,q:"\\left(-\\dfrac{2}{3}\\right)^4 = \\;?",o:["-\\dfrac{16}{81}","\\dfrac{16}{81}","-\\dfrac{8}{12}","\\dfrac{8}{12}"],c:1,e:"Exponente par → resultado positivo: 16/81"},
+  {cat:"Base negativa",d:2,q:"\\left(-\\dfrac{1}{2}\\right)^3 = \\;?",o:["\\dfrac{1}{8}","-\\dfrac{1}{8}","\\dfrac{3}{8}","-\\dfrac{3}{8}"],c:1,e:"Exponente impar → negativo: −1/8"},
+  {cat:"Base negativa",d:2,q:"\\left(-\\dfrac{3}{4}\\right)^2 = \\;?",o:["-\\dfrac{9}{16}","\\dfrac{9}{16}","-\\dfrac{6}{8}","\\dfrac{6}{8}"],c:1,e:"Exponente par → positivo: 9/16"},
+  {cat:"Base negativa",d:3,q:"-\\left(\\dfrac{3}{5}\\right)^2 = \\;?",o:["\\dfrac{9}{25}","-\\dfrac{9}{25}","\\dfrac{6}{10}","-\\dfrac{6}{10}"],c:1,e:"El signo negativo está FUERA del paréntesis: −9/25"},
+  // Mixtas
+  {cat:"P4 — Pot. producto",d:3,q:"\\left(\\dfrac{1}{2} \\cdot \\dfrac{2}{3}\\right)^2 = \\;?",o:["\\dfrac{2}{6}","\\dfrac{1}{9}","\\dfrac{2}{36}","\\dfrac{4}{36}"],c:1,e:"1/2 · 2/3 = 1/3 → (1/3)² = 1/9"},
+  {cat:"Mixta",d:3,q:"\\left(\\dfrac{2}{3}\\right)^2 \\cdot \\left(\\dfrac{3}{2}\\right)^2 = \\;?",o:["1","\\dfrac{4}{9}","\\dfrac{9}{4}","\\dfrac{36}{36}"],c:0,e:"(2/3 · 3/2)² = 1² = 1"},
+  {cat:"Mixta",d:2,q:"\\left[\\left(\\dfrac{2}{5}\\right)^3\\right]^0 = \\;?",o:["0","\\left(\\dfrac{2}{5}\\right)^3","1","\\dfrac{8}{125}"],c:2,e:"Cualquier expresión no nula elevada a 0 = 1"},
+  {cat:"Mixta",d:3,q:"\\left(\\dfrac{1}{3}\\right)^{-1} \\cdot \\left(\\dfrac{1}{3}\\right)^{-1} = \\;?",o:["9","\\dfrac{1}{9}","3","\\dfrac{1}{3}"],c:0,e:"(1/3)^−1 = 3, luego 3×3 = 9"},
+  {cat:"Mixta",d:3,q:"\\left(\\dfrac{4}{9}\\right)^{\\frac{1}{2}} = \\;?",o:["\\dfrac{2}{3}","\\dfrac{8}{18}","\\dfrac{16}{81}","\\dfrac{4}{3}"],c:0,e:"Exp 1/2 = raíz cuadrada: √4/√9 = 2/3"},
+  {cat:"Mixta",d:2,q:"\\left(\\dfrac{1}{2}\\right)^3 + \\left(\\dfrac{1}{2}\\right)^3 = \\;?",o:["\\left(\\dfrac{1}{2}\\right)^6","\\dfrac{1}{4}","\\dfrac{2}{8}","\\dfrac{1}{8}"],c:1,e:"¡Es suma, no producto! 1/8 + 1/8 = 2/8 = 1/4"},
+];
+
+/* Reference data */
+const REFS = [
+  {n:"Definición", f:"\\left(\\dfrac{a}{b}\\right)^n = \\dfrac{a^n}{b^n}", ex:"\\left(\\dfrac{2}{3}\\right)^4 = \\dfrac{16}{81}"},
+  {n:"P1 — Producto de igual base", f:"\\left(\\dfrac{a}{b}\\right)^m \\cdot \\left(\\dfrac{a}{b}\\right)^n = \\left(\\dfrac{a}{b}\\right)^{m+n}", ex:"\\left(\\dfrac{3}{5}\\right)^2 \\cdot \\left(\\dfrac{3}{5}\\right)^3 = \\left(\\dfrac{3}{5}\\right)^5"},
+  {n:"P2 — Cociente de igual base", f:"\\left(\\dfrac{a}{b}\\right)^m \\div \\left(\\dfrac{a}{b}\\right)^n = \\left(\\dfrac{a}{b}\\right)^{m-n}", ex:"\\left(\\dfrac{2}{7}\\right)^5 \\div \\left(\\dfrac{2}{7}\\right)^2 = \\left(\\dfrac{2}{7}\\right)^3"},
+  {n:"P3 — Potencia de potencia", f:"\\left[\\left(\\dfrac{a}{b}\\right)^m\\right]^n = \\left(\\dfrac{a}{b}\\right)^{m \\cdot n}", ex:"\\left[\\left(\\dfrac{1}{2}\\right)^3\\right]^2 = \\left(\\dfrac{1}{2}\\right)^6 = \\dfrac{1}{64}"},
+  {n:"P4 — Potencia de producto", f:"\\left(\\dfrac{a}{b} \\cdot \\dfrac{c}{d}\\right)^n = \\left(\\dfrac{a}{b}\\right)^n \\cdot \\left(\\dfrac{c}{d}\\right)^n", ex:"\\left(\\dfrac{1}{2} \\cdot \\dfrac{3}{4}\\right)^2 = \\dfrac{9}{64}"},
+  {n:"Exponente cero", f:"\\left(\\dfrac{a}{b}\\right)^0 = 1 \\quad (a/b \\neq 0)", ex:"\\left(-\\dfrac{99}{5}\\right)^0 = 1"},
+  {n:"Exponente negativo", f:"\\left(\\dfrac{a}{b}\\right)^{-n} = \\left(\\dfrac{b}{a}\\right)^{n}", ex:"\\left(\\dfrac{2}{3}\\right)^{-2} = \\left(\\dfrac{3}{2}\\right)^2 = \\dfrac{9}{4}", w:"Exp. negativo = invertir la fracción y elevar al positivo"},
+  {n:"Base negativa — signo", f:"(-\\tfrac{a}{b})^{\\text{par}} > 0 \\qquad (-\\tfrac{a}{b})^{\\text{impar}} < 0", ex:"\\left(-\\dfrac{2}{3}\\right)^2 = \\dfrac{4}{9} \\qquad \\left(-\\dfrac{2}{3}\\right)^3 = -\\dfrac{8}{27}", w:"¡Atención! −(2/3)² = −4/9, pero (−2/3)² = +4/9"},
+];
+
+/* Build reference */
+function buildRef() {
+  document.getElementById('ref-body').innerHTML = REFS.map(r=>`
+    <div class="ref-card">
+      <div class="ref-name">${r.n}</div>
+      <div class="ref-f">${tex(r.f,false)}</div>
+      <div class="ref-ex">${tex(r.ex,false)}</div>
+      ${r.w?`<div class="ref-warn">⚠ ${r.w}</div>`:''}
+    </div>`).join('');
+}
+
+/* STATE */
+const S = {mode:'clasico',diff:'facil',qs:[],idx:0,score:0,lives:3,streak:0,maxStreak:0,correct:0,ans:false,timer:null,tLeft:15};
+
+/* NAV */
+function go(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+function goRef(){buildRef();go('sc-ref');}
+function startMode(m){S.mode=m;S.diff='facil';document.querySelectorAll('.diff-btn').forEach((b,i)=>b.classList.toggle('selected',i===0));go('sc-diff');}
+function selDiff(el,d){S.diff=d;document.querySelectorAll('.diff-btn').forEach(b=>b.classList.remove('selected'));el.classList.add('selected');}
+function launchGame(){buildSet();initGame();go('sc-game');}
+
+/* BUILD SET */
+function buildSet(){
+  const dm={facil:[1],medio:[1,2],dificil:[2,3]};
+  const lvl=dm[S.diff];
+  let pool=QS.filter(q=>lvl.includes(q.d)).sort(()=>Math.random()-.5);
+  const cnt=S.mode==='contrarreloj'?15:20;
+  S.qs=pool.slice(0,cnt);
+  if(S.qs.length<cnt){const ex=QS.sort(()=>Math.random()-.5);for(const q of ex){if(!S.qs.includes(q))S.qs.push(q);if(S.qs.length>=cnt)break;}}
+}
+
+/* INIT */
+function initGame(){
+  S.idx=0;S.score=0;S.lives=S.mode==='desafio'?1:3;S.streak=0;S.maxStreak=0;S.correct=0;
+  const dots=document.getElementById('p-dots');dots.innerHTML='';
+  S.qs.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' current':'');d.id='d'+i;dots.appendChild(d);});
+  renderQ();
+}
+
+/* RENDER */
+const LTRS=['A','B','C','D'];
+function renderQ(){
+  const q=S.qs[S.idx];S.ans=false;
+  document.getElementById('d-score').textContent=S.score;
+  document.getElementById('d-lives').textContent=S.mode==='desafio'?'1':S.lives;
+  document.getElementById('q-ctr').textContent=`${S.idx+1}/${S.qs.length}`;
+  document.getElementById('cat-tag').textContent=q.cat;
+  document.getElementById('q-disp').innerHTML=tex(q.q,true);
+  document.getElementById('q-card').className='q-card';
+  const fb=document.getElementById('fb');fb.className='fb';fb.innerHTML='';
+  document.getElementById('nb').className='next-btn';
+  const sp=document.getElementById('sp');sp.style.display=S.streak>=2?'flex':'none';
+  document.getElementById('d-streak').textContent=S.streak;
+
+  const list=document.getElementById('opts');list.innerHTML='';
+  const sh=q.o.map((o,i)=>({latex:o,oi:i})).sort(()=>Math.random()-.5);
+  sh.forEach((op,si)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn';btn.dataset.oi=op.oi;
+    btn.innerHTML=`<span class="opt-ltr">${LTRS[si]}</span><span class="opt-math">${tex(op.latex,false)}</span>`;
+    btn.onclick=()=>answer(op.oi,btn);
+    list.appendChild(btn);
+  });
+
+  clearInterval(S.timer);
+  if(S.mode==='contrarreloj'){
+    S.tLeft=15;updTmr(1);
+    S.timer=setInterval(()=>{S.tLeft--;updTmr(S.tLeft/15);if(S.tLeft<=0){clearInterval(S.timer);timeUp();}},1000);
+  } else updTmr(1);
+}
+
+function updTmr(f){const el=document.getElementById('t-fill');el.style.width=(f*100)+'%';el.classList.toggle('warn',f<.35);}
+
+/* ANSWER */
+function answer(oi,clicked){
+  if(S.ans)return;S.ans=true;clearInterval(S.timer);
+  const q=S.qs[S.idx];const ok=oi===q.c;
+  document.querySelectorAll('.opt-btn').forEach(b=>{
+    b.disabled=true;const bi=parseInt(b.dataset.oi);
+    if(bi===q.c)b.classList.add(ok?'correct':'reveal');
+    else if(b===clicked&&!ok)b.classList.add('wrong');
+  });
+  const fb=document.getElementById('fb');
+  const card=document.getElementById('q-card');
+  if(ok){
+    S.streak++;S.maxStreak=Math.max(S.maxStreak,S.streak);S.correct++;
+    let pts=100;if(S.mode==='contrarreloj')pts+=Math.floor(S.tLeft*10);if(S.streak>=3){pts+=50;showCombo(S.streak);}
+    S.score+=pts;card.classList.add('correct-flash');
+    fb.innerHTML=`<strong>✓ Correcto${S.mode!=='desafio'?' (+'+pts+' pts)':''}!</strong> — ${q.e}`;
+    fb.className='fb show ok';markDot('done');
+  } else {
+    S.streak=0;if(S.mode!=='repaso')S.lives--;
+    card.classList.add('wrong-flash');
+    fb.innerHTML=`<strong>✗ Incorrecto.</strong> — ${q.e}`;
+    fb.className='fb show err';markDot('wrong-done');
+    document.getElementById('d-lives').textContent=S.mode==='desafio'?'0':S.lives;
+  }
+  document.getElementById('d-score').textContent=S.score;
+  document.getElementById('d-streak').textContent=S.streak;
+  document.getElementById('sp').style.display=S.streak>=2?'flex':'none';
+  const nb=document.getElementById('nb');
+  const last=S.idx>=S.qs.length-1,over=S.lives<=0;
+  nb.textContent=(last||over)?'Ver resultados →':'Siguiente →';
+  nb.classList.add('vis');
+}
+
+function timeUp(){
+  if(S.ans)return;S.ans=true;S.streak=0;
+  const q=S.qs[S.idx];if(S.mode!=='repaso')S.lives--;
+  document.getElementById('q-card').classList.add('wrong-flash');
+  document.querySelectorAll('.opt-btn').forEach(b=>{b.disabled=true;if(parseInt(b.dataset.oi)===q.c)b.classList.add('reveal');});
+  const fb=document.getElementById('fb');
+  fb.innerHTML=`<strong>⏰ ¡Tiempo!</strong> — ${q.e}`;
+  fb.className='fb show err';markDot('wrong-done');
+  const nb=document.getElementById('nb');
+  nb.textContent=(S.idx>=S.qs.length-1||S.lives<=0)?'Ver resultados →':'Siguiente →';
+  nb.classList.add('vis');
+}
+
+function nextQ(){
+  if(S.idx>=S.qs.length-1||S.lives<=0){showRes();return;}
+  S.idx++;
+  document.querySelectorAll('.dot').forEach((d,i)=>{if(i===S.idx)d.classList.add('current');else d.classList.remove('current');});
+  renderQ();
+}
+
+function markDot(cls){const d=document.getElementById('d'+S.idx);if(d){d.classList.remove('current');d.classList.add(cls);}}
+
+function showCombo(s){
+  const el=document.getElementById('combo');
+  const m={3:'🔥 ¡COMBO x3!',4:'⚡ ¡RACHA x4!',5:'💥 ¡IMPARABLE!',6:'🌟 ¡LEYENDA!'};
+  el.textContent=m[Math.min(s,6)]||`🔥 ×${s}`;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),1400);
+}
+
+function showRes(){
+  clearInterval(S.timer);const tot=S.qs.length,pct=S.correct/tot;
+  let grade,stars,sub;
+  if(pct>=.9){grade='¡Perfecto!';stars='⭐⭐⭐';sub='Dominas las potencias racionales';}
+  else if(pct>=.7){grade='¡Muy bien!';stars='⭐⭐';sub='Sigue practicando para llegar al 100%';}
+  else if(pct>=.5){grade='Bien hecho';stars='⭐';sub='Repasa las propiedades e inténtalo de nuevo';}
+  else{grade='Sigue así';stars='💪';sub='Revisa la guía de fórmulas y vuelve a intentarlo';}
+  document.getElementById('r-grade').textContent=grade;
+  document.getElementById('r-stars').textContent=stars;
+  document.getElementById('r-sub').textContent=sub;
+  document.getElementById('r-c').textContent=`${S.correct}/${tot}`;
+  document.getElementById('r-s').textContent=S.score;
+  document.getElementById('r-mx').textContent=S.maxStreak;
+  go('sc-res');
+}
+
+function restart(){buildSet();initGame();go('sc-game');}
+</script>
+</body>
+</html>
